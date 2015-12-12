@@ -1,13 +1,15 @@
 import logging
 import os
 import sys
-import time
 
-from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+from twitterkit import support
 from twitterkit import tweet_access
+
+
+logger = logging.getLogger()
 
 ACCESS_TOKEN_KEY = os.environ['ACCESS_TOKEN_KEY']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
@@ -57,15 +59,16 @@ TAGS = [
 
 
 def main():
+    logger = support.getLogger('tsv_writer')
     while True:
         try:
-            data_streamer = tweet_access.TsvStreamer()
+            data_streamer = tweet_access.TsvStreamer(filename=FILENAME)
             auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
             auth.set_access_token(ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET)
             stream = Stream(auth, data_streamer)
-            stream.filter(languages=LANGUAGES, track=TAGS, async=True)
+            stream.filter(languages=LANGUAGES, track=TAGS, async=False)
         except Exception, e:
-            print e.message
+            logger.exception(e)
             stream.disconnect()
 
 
