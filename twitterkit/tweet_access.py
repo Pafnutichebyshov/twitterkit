@@ -4,7 +4,6 @@ from tweepy.streaming import StreamListener
 class TweetStreamer(StreamListener):
 
     def on_error(self, status_code):
-        import pdb; pdb.set_trace()  # XXX BREAKPOINT
         return False
 
 
