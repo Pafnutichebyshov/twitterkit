@@ -16,7 +16,7 @@ ACCESS_TOKEN_KEY = os.environ['ACCESS_TOKEN_KEY']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-FILENAME = '/Users/ng/data/2016-03-01_election.json'
+FILENAME = '/Users/ng/data/2016-03-02.json'
 LANGUAGES = ['en']
 
 TAGS = [

@@ -6,6 +6,8 @@ import tweepy
 from tweepy.streaming import StreamListener
 import unicodecsv as csv
 
+from twitterkit import utils
+
 
 def getSession(auth_keys=None):
     access_token_key = os.environ['ACCESS_TOKEN_KEY']
@@ -61,6 +63,7 @@ class TsvStreamer(TweetStreamer):
         text = data.text.lower()
         return _id, created_at, user, text
 
+
 class JsonStreamer(TweetStreamer):
     def __init__(self, *args, **kwargs):
         self.filename = kwargs.pop('filename')
@@ -68,6 +71,5 @@ class JsonStreamer(TweetStreamer):
 
     def on_status(self, data):
         with open(self.filename, 'a') as f:
-            json.dump(json.dumps(data._json), f)
-            f.write('\n')
+            utils.write_json(data._json, f)
         return True
