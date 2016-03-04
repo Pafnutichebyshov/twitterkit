@@ -56,7 +56,7 @@ class ExtractTextTest(chai.Chai):
         id_str = 'blah'
         user_id = '111'
         created_at = 'whatever'
-        source = 'series of tubes'
+        source = 'null'
         coordinates = [1, 1]
         text = 'yolo'
         full_name = 'Shinjuku'
@@ -78,8 +78,10 @@ class ExtractTextTest(chai.Chai):
             'created_at': created_at,
             'source': source,
             'text': text,
-            'coordinates': coordinates,
+            'longitude': 1,
+            'latitude': 1,
             'full_name': full_name,
+            'name': 'null',
             'country_code': country_code,
         }
         actual_output = utils.extract_text(data)
@@ -89,7 +91,7 @@ class ExtractTextTest(chai.Chai):
         id_str = 'blah'
         user_id = '111'
         created_at = 'whatever'
-        source = 'series of tubes'
+        source = 'null'
         text = 'yolo'
         data = {
             'created_at': created_at,
@@ -106,8 +108,10 @@ class ExtractTextTest(chai.Chai):
             'created_at': created_at,
             'source': source,
             'text': text,
-            'coordinates': 'null',
+            'longitude': 'null',
+            'latitude': 'null',
             'full_name': 'null',
+            'name': 'null',
             'country_code': 'null',
         }
         actual_output = utils.extract_text(data)

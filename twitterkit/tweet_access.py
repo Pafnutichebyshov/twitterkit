@@ -1,12 +1,12 @@
-import json
+import datetime
 import os
 
-import attrdict
 import tweepy
 from tweepy.streaming import StreamListener
+import pandas as pd
 import unicodecsv as csv
 
-from twitterkit import utils
+from twitterkit import utils, utils_bak
 
 
 def getSession(auth_keys=None):
@@ -32,38 +32,6 @@ class StdoutStreamer(TweetStreamer):
         return True
 
 
-class TsvStreamer(TweetStreamer):
-    def __init__(self, *args, **kwargs):
-        self.filename = kwargs.pop('filename')
-        TweetStreamer.__init__(self, *args, **kwargs)
-
-    def on_data(self, data):
-        data = attrdict.AttrDict(json.loads(data))
-        if not hasattr(data, 'text'):
-            return True
-        with open(self.filename, 'a') as f:
-            if data.text.startswith('RT @'):
-                return True
-            csv_writer = csv.writer(f, delimiter='\t')
-            csv_writer.writerows(self._getAttributes(data))
-        return True
-
-    def on_status(self, data):
-        with open(self.filename, 'a') as f:
-            if data.text.startswith('RT @'):
-                return True
-            csv_writer = csv.writer(f, delimiter='\t')
-            csv_writer.writerow(self.getAttributes(data))
-        return True
-
-    def _getAttributes(self, data):
-        created_at = data.created_at
-        _id = data.id
-        user = data.user.screen_name
-        text = data.text.lower()
-        return _id, created_at, user, text
-
-
 class JsonStreamer(TweetStreamer):
     def __init__(self, *args, **kwargs):
         self.filename = kwargs.pop('filename')
@@ -72,4 +40,35 @@ class JsonStreamer(TweetStreamer):
     def on_status(self, data):
         with open(self.filename, 'a') as f:
             utils.write_json(data._json, f)
+        return True
+
+
+class TsvStreamer(TweetStreamer):
+    def __init__(self, *args, **kwargs):
+        self.output = kwargs.pop('output')
+        self.func = kwargs.pop('func')
+        self.monitor = kwargs.pop('monitor')
+        TweetStreamer.__init__(self, *args, **kwargs)
+        self.func_file = {}
+        self.num = 0.0
+        self.start = datetime.datetime.utcnow()
+        for table, func in self.func.items():
+            output_file = '{}_{}.tsv'.format(self.output, table)
+            f = open(output_file, 'a')
+            fieldnames = func({})
+            csv_writer = csv.DictWriter(f, fieldnames, delimiter='\t')
+            if not os.path.getsize(output_file):
+                csv_writer.writeheader()
+            self.func_file[table] = (func, csv_writer)
+
+
+    def on_status(self, data):
+        if self.monitor:
+            now = datetime.datetime.utcnow()
+            _diff = (now - pd.to_datetime(data._json['created_at'])).total_seconds()
+            elapsed_time = (now - self.start).total_seconds()
+            self.num += 1
+            print('lag: {}'.format(_diff))
+            print self.num / elapsed_time
+        utils_bak.process_tweet_2(data._json, self.func_file)
         return True

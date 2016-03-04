@@ -16,7 +16,7 @@ ACCESS_TOKEN_KEY = os.environ['ACCESS_TOKEN_KEY']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-FILENAME = '/Users/ng/data/2016-03-02.json'
+FILENAME = '/Users/ng/data/2016-03-03c.json'
 LANGUAGES = ['en']
 
 TAGS = [
@@ -79,7 +79,7 @@ def main():
         except Exception, e:
             logger.exception(e)
             stream.disconnect()
-            time.sleep(90)
+            time.sleep(60)
 
 
 if __name__ == '__main__':

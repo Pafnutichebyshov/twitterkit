@@ -13,4 +13,4 @@ if __name__ == '__main__':
         'tweet':  utils.extract_text,
         'hashtag': utils.extract_entities,
     }
-    utils.process_tweets(args.input_file, args.output, table_funcs)
+    utils.process_tweets_to_csv(args.input_file, args.output, table_funcs)

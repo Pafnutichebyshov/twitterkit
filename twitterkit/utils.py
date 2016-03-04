@@ -3,6 +3,8 @@ import os
 import ujson as json
 import unicodecsv as csv
 
+import time
+
 
 def load_json(filelike):
     for line in filelike:
@@ -34,20 +36,28 @@ def extract_user(tweet):
     }
 
 
-def extract_text(tweet):
+def extract_text(tweet, null='null'):
     """Extracts text data from a tweet object"""
     source = extract_value(tweet, 'source')
-    if source != 'null':
+    if source != null:
         # remove html tags
         source = source.split('>')[1].split('<')[0]
+    coordinates = extract_value(tweet, 'coordinates.coordinates')
+    if coordinates != null:
+        longit, latit = coordinates
+    else:
+        longit = null
+        latit = null
     return {
         'id_str': extract_value(tweet, 'id_str'),
         'user_id': extract_value(tweet, 'user.id_str'),
         'created_at': extract_value(tweet, 'created_at'),
         'source': source,
         'text': extract_value(tweet, 'text'),
-        'coordinates': extract_value(tweet, 'coordinates.coordinates'),
+        'longitude': longit,
+        'latitude': latit,
         'full_name': extract_value(tweet, 'place.full_name'),
+        'name': extract_value(tweet, 'place.name'),
         'country_code': extract_value(tweet, 'place.country_code'),
     }
 
@@ -73,18 +83,43 @@ def extract_entities(tweet):
     }
 
 
-def process_tweets(input_file, output_prefix, table_funcs):
-    with open(input_file, 'r') as input_obj:
-        tweets = load_json(input_obj)
-        for num, tweet in enumerate(tweets):
-            print(num)
-            for table, func in table_funcs.items():
-                output_file = '{}_{}.tsv'.format(output_prefix, table)
-                with open(output_file, 'a') as f:
-                    fieldnames = func({})
-                    csv_writer = csv.DictWriter(f, fieldnames, delimiter='\t')
-                    if not os.path.getsize(output_file):
-                        csv_writer.writeheader()
+def process_tweets_to_csv(input_file, output_prefix, table_funcs):
+    for table, func in table_funcs.items():
+        start_time = time.time()
+        output_file = '{}_{}.tsv'.format(output_prefix, table)
+        with open(output_file, 'a') as f:
+            fieldnames = func({})
+            csv_writer = csv.DictWriter(f, fieldnames, delimiter='\t')
+            if not os.path.getsize(output_file):
+                csv_writer.writeheader()
+            with open(input_file, 'r') as input_obj:
+                tweets = load_json(input_obj)
+                for num, tweet in enumerate(tweets):
+                    if not num % 1000:
+                        elapsed_time = time.time() - start_time
+                        rate_per_second = num / elapsed_time
+                        print('{} per second'.format(rate_per_second))
                     parsed_tweet = func(tweet)
                     if parsed_tweet:
                         csv_writer.writerow(parsed_tweet)
+
+
+def process_tweet_obj(tweet, output_prefix, table_funcs):
+    for table, func in table_funcs.items():
+        output_file = '{}_{}.tsv'.format(output_prefix, table)
+        with open(output_file, 'a') as f:
+            fieldnames = func({})
+            csv_writer = csv.DictWriter(f, fieldnames, delimiter='\t')
+            if not os.path.getsize(output_file):
+                csv_writer.writeheader()
+            parsed_tweet = func(tweet)
+            if parsed_tweet:
+                csv_writer.writerow(parsed_tweet)
+
+
+def process_tweet_2(tweet, func_file):
+    for table, func_writer in func_file.items():
+        func, csv_writer = func_writer
+        parsed_tweet = func(tweet)
+        if parsed_tweet:
+            csv_writer.writerow(parsed_tweet)
