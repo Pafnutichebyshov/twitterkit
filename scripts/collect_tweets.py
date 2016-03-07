@@ -11,7 +11,6 @@ from requests.packages.urllib3.exceptions import ProtocolError
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-from twitterkit import support
 from twitterkit import tweet_access
 from twitterkit import utils
 
@@ -30,12 +29,8 @@ def main():
     parser.add_argument('output_file', help='Prefix for output file.')
     args = parser.parse_args()
 
-    logger = support.getLogger('tsv_writer')
-
     funcs = {
-        'user': utils.extract_user,
         'tweet':  utils.extract_text,
-        'hashtag': utils.extract_entities,
     }
 
     while True:
@@ -52,7 +47,7 @@ def main():
         except (IndexError, ConnectionError, ProtocolError), e:
             logger.exception(e)
             stream.disconnect()
-            time.sleep(60)
+            time.sleep(90)
             continue
 
 

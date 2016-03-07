@@ -6,7 +6,7 @@ from tweepy.streaming import StreamListener
 import pandas as pd
 import unicodecsv as csv
 
-from twitterkit import utils, utils_bak
+from twitterkit import utils
 
 
 def getSession(auth_keys=None):
@@ -70,5 +70,5 @@ class TsvStreamer(TweetStreamer):
             self.num += 1
             print('lag: {}'.format(_diff))
             print self.num / elapsed_time
-        utils_bak.process_tweet_2(data._json, self.func_file)
+        utils.process_tweet_2(data._json, self.func_file)
         return True
