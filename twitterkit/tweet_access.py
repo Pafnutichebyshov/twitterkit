@@ -70,5 +70,5 @@ class TsvStreamer(TweetStreamer):
             self.num += 1
             print('lag: {}'.format(_diff))
             print self.num / elapsed_time
-        utils.process_tweet_2(data._json, self.func_file)
+        utils.process_tweet(data._json, self.func_file)
         return True

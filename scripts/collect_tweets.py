@@ -36,7 +36,7 @@ def main():
     while True:
         try:
             data_streamer = tweet_access.TsvStreamer(
-                output=args.output_file, func=funcs, monitor=True)
+                output=args.output_file, func=funcs, monitor=False)
             auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
             auth.set_access_token(ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET)
             stream = Stream(auth, data_streamer)

@@ -43,23 +43,12 @@ def extract_text(tweet, null='null'):
     if source != null:
         # remove html tags
         source = source.split('>')[1].split('<')[0]
-    coordinates = extract_value(tweet, 'coordinates.coordinates')
-    if coordinates != null:
-        longit, latit = coordinates
-    else:
-        longit = null
-        latit = null
     return {
         'id_str': extract_value(tweet, 'id_str'),
         'user_id': extract_value(tweet, 'user.id_str'),
         'created_at': extract_value(tweet, 'created_at'),
         'source': source,
-        'text': extract_value(tweet, 'text'),
-        'longitude': longit,
-        'latitude': latit,
-        'full_name': extract_value(tweet, 'place.full_name'),
-        'name': extract_value(tweet, 'place.name'),
-        'country_code': extract_value(tweet, 'place.country_code'),
+        'text': sanitize_string(extract_value(tweet, 'text')),
     }
 
 
@@ -118,16 +107,15 @@ def process_tweet_obj(tweet, output_prefix, table_funcs):
                 csv_writer.writerow(parsed_tweet)
 
 
-def process_tweet_2(tweet, func_file):
+def process_tweet(tweet, func_file):
     for table, func_writer in func_file.items():
         func, csv_writer = func_writer
         parsed_tweet = func(tweet)
         if parsed_tweet:
             csv_writer.writerow(parsed_tweet)
-import logging
 
 
-def getLogger(name, log_level=logging.DEBUG):
+def get_logger(name, log_level=logging.DEBUG):
     logger = logging.getLogger(name)
     logger.setLevel(log_level)
     fh = logging.FileHandler('{}.log'.format(name))
@@ -140,3 +128,8 @@ def getLogger(name, log_level=logging.DEBUG):
     logger.addHandler(fh)
     logger.addHandler(ch)
     return logger
+
+
+def sanitize_string(input_string):
+    """Remove non-printing characters from a string."""
+    return ''.join(c if ord(c) >= 32 else u'?' for c in input_string)

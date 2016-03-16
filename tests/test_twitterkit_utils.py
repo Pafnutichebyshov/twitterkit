@@ -78,9 +78,6 @@ class ExtractTextTest(chai.Chai):
             'created_at': created_at,
             'source': source,
             'text': text,
-            'full_name': full_name,
-            'name': 'null',
-            'country_code': country_code,
         }
         actual_output = utils.extract_text(data)
         self.assertEqual(expected_output, actual_output)
@@ -106,9 +103,6 @@ class ExtractTextTest(chai.Chai):
             'created_at': created_at,
             'source': source,
             'text': text,
-            'full_name': 'null',
-            'name': 'null',
-            'country_code': 'null',
         }
         actual_output = utils.extract_text(data)
         self.assertEqual(expected_output, actual_output)
