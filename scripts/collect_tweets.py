@@ -15,7 +15,7 @@ from twitterkit import tweet_access
 from twitterkit import utils
 
 
-logger = utils.getLogger('collect_tweets.py')
+logger = utils.get_logger('collect_tweets.py')
 
 ACCESS_TOKEN_KEY = os.environ['ACCESS_TOKEN_KEY']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']

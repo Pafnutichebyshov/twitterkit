@@ -1,4 +1,5 @@
 import argparse
+import collections
 
 from gensim import models
 from sklearn.feature_extraction.text import CountVectorizer
@@ -17,10 +18,8 @@ def train_model(sentences):
     num_features = 300
     min_word_count = 5
     num_workers = 4
-    window = 10
+    window = 5
     negative = 10
-    bigram = models.Phrases(sentences)
-    sentences = [s for s in bigram[sentences]]
     model = models.Word2Vec(
         workers=num_workers,
         size=num_features,
@@ -33,11 +32,34 @@ def train_model(sentences):
     return model
 
 
+def get_token_author(tweets, model, dim=(300, 1), field='tokens'):
+    """Gets vectors used for discovering similar users."""
+    token_user = collections.defaultdict(set)
+    user_vector = {}
+    for num_tweet in tweets.iterrows():
+        _, tweet = num_tweet
+        print(_)
+        tokens = tweet[field]
+        user_id = tweet['user_id']
+        for token in tokens:
+            token_user[token].add(user_id)
+            try:
+                vector = model[token].reshape(dim)
+                if user_id in user_vector:
+                    user_vector[user_id] += vector
+                else:
+                    user_vector[user_id] = vector
+            except KeyError:
+                continue
+    return token_user, user_vector
+
+
 def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file')
     args = parser.parse_args(args)
-    df = pd.read_csv(args.input_file, sep='\t', encoding='utf-8')
+    dtype = {'user_id': str, 'id_str': str}
+    df = pd.read_csv(args.input_file, sep='\t', encoding='utf-8', dtype=dtype)
     df = df[pd.notnull(df['text'])]
     tokenizer = CountVectorizer().build_tokenizer()
     preprocessor = CountVectorizer().build_preprocessor()
