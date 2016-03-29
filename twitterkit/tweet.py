@@ -4,8 +4,11 @@ import os
 import tweepy
 from tweepy.streaming import StreamListener
 import pandas as pd
+import psycopg2
+import psycopg2.extras
 import unicodecsv as csv
 
+from twitterkit import tables
 from twitterkit import utils
 
 
@@ -22,13 +25,16 @@ def getSession(auth_keys=None):
 class TweetStreamer(StreamListener):
 
     def on_error(self, status_code):
-        return False
+        return True
 
+
+    def on_timeout(self, status_code):
+        return True
 
 class StdoutStreamer(TweetStreamer):
 
     def on_data(self, data):
-        print data
+        print(data)
         return True
 
 
@@ -69,6 +75,29 @@ class TsvStreamer(TweetStreamer):
             elapsed_time = (now - self.start).total_seconds()
             self.num += 1
             print('lag: {}'.format(_diff))
-            print self.num / elapsed_time
+            print(self.num / elapsed_time)
         utils.process_tweet(data._json, self.func_file)
+        return True
+
+
+class PostgresStreamer(TweetStreamer):
+    """Stream Twitter data to a postgres table."""
+    query = """INSERT INTO {tablename}
+        (id_str, created_at, user_id, source, text)
+        values (%(id_str)s, %(created_at)s, %(user_id)s, %(source)s, %(text)s)"""
+
+    def __init__(self, *args, **kwargs):
+        self.conn = kwargs.pop('conn')
+        self.tablename = kwargs.pop('tablename')
+        self.query = self.query.format(tablename=self.tablename)
+        TweetStreamer.__init__(self, *args, **kwargs)
+
+    def on_status(self, data):
+        args = utils.extract_text(data._json)
+        try:
+            utils.insert_query(self.conn, self.query, args)
+        except psycopg2.IntegrityError:
+            self.conn.rollback()
+        else:
+            self.conn.commit()
         return True

@@ -1,6 +1,8 @@
 .DS_Store
 *.csv
 *.tsv
+*.txt
+*.pkl
 *.pyc
 *.log
 *.egg-info/

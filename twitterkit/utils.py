@@ -1,10 +1,11 @@
 import logging
 import os
+import time
 
+import psycopg2
 import ujson as json
 import unicodecsv as csv
 
-import time
 
 
 def load_json(filelike):
@@ -39,7 +40,7 @@ def extract_user(tweet):
 
 def extract_text(tweet, null='null'):
     """Extracts text data from a tweet object"""
-    source = extract_value(tweet, 'source')
+    source = extract_value(tweet, 'source') or null
     if source != null:
         # remove html tags
         source = source.split('>')[1].split('<')[0]
@@ -133,3 +134,14 @@ def get_logger(name, log_level=logging.DEBUG):
 def sanitize_string(input_string):
     """Remove non-printing characters from a string."""
     return ''.join(c if ord(c) >= 32 else u'?' for c in input_string)
+
+
+def connect(user, password='', host='localhost', port='5432', db='twitter'):
+    """Establish a connection to a postgresql database."""
+    return psycopg2.connect(database=db, user=user, password=password, host=host, port=port)
+
+
+def insert_query(conn, query, args):
+    """Returns a list of rows (as dictionaries) that are the result of the query """
+    with conn.cursor() as cursor:
+        cursor.execute(query, args)
