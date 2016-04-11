@@ -1,5 +1,6 @@
-tweepy
+gensim
 pandas
 psycopg2
+tweepy
 ujson
 unicodecsv

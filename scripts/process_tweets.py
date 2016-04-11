@@ -38,7 +38,6 @@ def get_token_author(tweets, model, dim=(300, 1), field='tokens'):
     user_vector = {}
     for num_tweet in tweets.iterrows():
         _, tweet = num_tweet
-        print(_)
         tokens = tweet[field]
         user_id = tweet['user_id']
         for token in tokens:
@@ -59,7 +58,7 @@ def main(args=None):
     parser.add_argument('input_file')
     args = parser.parse_args(args)
     dtype = {'user_id': str, 'id_str': str}
-    df = pd.read_csv(args.input_file, sep='\t', encoding='utf-8', dtype=dtype)
+    df = pd.read_csv(args.input_file, encoding='utf-8', dtype=dtype)
     df = df[pd.notnull(df['text'])]
     tokenizer = CountVectorizer().build_tokenizer()
     preprocessor = CountVectorizer().build_preprocessor()

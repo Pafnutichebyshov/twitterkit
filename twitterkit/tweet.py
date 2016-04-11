@@ -8,7 +8,6 @@ import psycopg2
 import psycopg2.extras
 import unicodecsv as csv
 
-from twitterkit import tables
 from twitterkit import utils
 
 
